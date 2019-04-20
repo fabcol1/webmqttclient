@@ -11,4 +11,4 @@
 
 #
 
-## Try it here: <a href="https://web-mqtt-client.netlify.com" target="_blank">Web MQTT Client</a>
+## Try it here: [Web MQTT Client]("https://web-mqtt-client.netlify.com"){:target="\_blank"}
