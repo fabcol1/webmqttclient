@@ -1,8 +1,10 @@
 class MqttEasyClient {
-  constructor(ip, port, topic, logs, onMessageArrived) {
+  constructor(ip, port, topic, username, password, logs, onMessageArrived) {
     this.ip = ip;
     this.port = port;
     this.topic = topic;
+    this.username = username;
+    this.password = password;
     this.onMessageArrived = onMessageArrived;
     this.clientId = this._guid();
     this.client = this._connect();
@@ -30,7 +32,21 @@ class MqttEasyClient {
         c = new Paho.MQTT.Client(this.ip, Number(this.port), this.clientId);
         c.onConnectionLost = this._onConnectionLost.bind(this);
         c.onMessageArrived = this._onMessageArrived.bind(this);
-        c.connect({ onSuccess: this._onSuccess.bind(this), useSSL: true });
+        let connectOptions = {
+          onSuccess: this._onSuccess.bind(this),
+          useSSL: true
+        };
+        if (this.username && this.password) {
+          connectOptions = {
+            ...connectOptions,
+            userName: this.username,
+            password: this.password
+          };
+        }
+        if (this.logs) {
+          console.log(connectOptions);
+        }
+        c.connect(connectOptions);
       } catch (e) {
         throw e;
       }
@@ -53,12 +69,18 @@ class MqttEasyClient {
   }
 
   _onMessageArrived(message) {
-    if (this.logs) {
-      console.log('Topic:', message.destinationName);
-      console.log('Payload:', message.payloadString);
-    }
-    if (this.onMessageArrived) {
-      this.onMessageArrived(message.destinationName, message.payloadString);
+    try {
+      if (this.logs) {
+        console.log('Topic:', message.destinationName);
+        console.log('Payload:', message.payloadString);
+      }
+      if (this.onMessageArrived) {
+        this.onMessageArrived(message.destinationName, message.payloadString);
+      }
+    } catch (e) {
+      if (this.logs) {
+        console.log(e);
+      }
     }
   }
 
