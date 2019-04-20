@@ -17,7 +17,7 @@ class MqttEasyClient {
           `%cclient %c${this.clientId} %cdisconnected`,
           'color:black',
           'color: red',
-          'color: black',
+          'color: black'
         );
       }
     }
@@ -30,7 +30,7 @@ class MqttEasyClient {
         c = new Paho.MQTT.Client(this.ip, Number(this.port), this.clientId);
         c.onConnectionLost = this._onConnectionLost.bind(this);
         c.onMessageArrived = this._onMessageArrived.bind(this);
-        c.connect({ onSuccess: this._onSuccess.bind(this) });
+        c.connect({ onSuccess: this._onSuccess.bind(this), useSSL: true });
       } catch (e) {
         throw e;
       }
