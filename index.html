@@ -137,12 +137,20 @@
         },
         mounted() {
           setTimeout(() => {
-            this.activeClients.push({
-              ip: 'iot.eclipse.org',
-              port: '443',
-              topic: '#',
-              index: this.guid()
-            });
+            this.activeClients.push(
+              {
+                ip: 'iot.eclipse.org',
+                port: '443',
+                topic: '#',
+                index: this.guid()
+              },
+              {
+                ip: 'iot.eclipse.org',
+                port: '443',
+                topic: '#',
+                index: this.guid()
+              }
+            );
           }, 2000);
         }
       });

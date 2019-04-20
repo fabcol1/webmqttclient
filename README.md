@@ -1,4 +1,4 @@
-# Simple MQTT Client in your browser [(Web MQTT Client)](https://vuejs.org/)
+# Simple MQTT Client in your browser <a href="https://web-mqtt-client.netlify.com" target="_blank">Web MQTT Client</a>
 
 ## Provide IP, Port and Topic of a valid MQTT Broker and start receiving messages.
 
@@ -11,4 +11,4 @@
 
 #
 
-## Try it here: [Web MQTT Client](https://web-mqtt-client.netlify.com)
+## Try it here: <a href="https://web-mqtt-client.netlify.com" target="_blank">Web MQTT Client</a>
