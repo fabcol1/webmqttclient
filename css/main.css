@@ -1,0 +1,11 @@
+.container-fluid {
+  max-width: 95%;
+  margin: 0 auto;
+}
+@media (min-width: 768px) {
+  .container-fluid {
+    margin-left: 70px;
+    max-width: calc(100% - 100px);
+    margin-top: 21px;
+  }
+}

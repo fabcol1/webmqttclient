@@ -1,6 +1,7 @@
 Vue.component('card-mqtt', {
   props: {
     callback: Function,
+    zindexcallback: Function,
     k: String,
     ip: String,
     port: String,
@@ -11,7 +12,8 @@ Vue.component('card-mqtt', {
       key: this.k,
       messages: [],
       client: undefined,
-      error: false
+      error: false,
+      zindex: 1000
     };
   },
 
@@ -30,11 +32,13 @@ Vue.component('card-mqtt', {
       });
     },
     onDragStartCallback: function(e) {
-      if (e.target.id !== 'header') {
-        if (e.stopPropagation) e.stopPropagation();
-        if (e.cancelBubble != null) e.cancelBubble = true;
-        throw 'Stop propagation';
-      }
+      this.zindexcallback(e, this);
+
+      // if (e.target.id !== 'header') {
+      //   if (e.stopPropagation) e.stopPropagation();
+      //   if (e.cancelBubble != null) e.cancelBubble = true;
+      //   throw 'Stop propagation';
+      // }
     }
   },
 
@@ -54,26 +58,26 @@ Vue.component('card-mqtt', {
   },
 
   template: `
-    <vue-draggable-resizable class="bg-light" :w="500" :h="250" :min-height="300" :min-width="300" :parent="true" :on-drag-start="onDragStartCallback">
+    <vue-draggable-resizable class="bg-light" :w="500" :h="250" :min-height="300" :min-width="300" :parent="true" :on-drag-start="onDragStartCallback" :z="zindex">
               
     <div class="card text-center" style="position:relative; width:100%; height: 100% ">
-        <div class="card-header text-left"  id="header">
-          <strong class="text-primary"> {{ip}}</strong>:<strong class="text-success">{{port}}</strong> {{topic}}
+        <div class="card-header text-left bg-light"  id="header">
+          <code class="text-dark"> {{ip}}</code>:<code class="text-danger">{{port}}</code> <code class="text-info">{{topic}}</code>
         </div>
         <div class="card-body" style="position:relative;">
         <div class= "scroll" style="width:100%; height: 100%; top: 0; position: absolute; left: 0; overflow-y: scroll; text-align: left; padding-left: 7px;">
         
         <div v-if="error" class="text-danger" >Damn! Connection Error!</div>
-        <div v-else class="card-text" style="font-size: 10px;" v-for="(value, key) of messages">
-          <span class="text-primary">{{value.date}}</span> - <span class="text-success">{{value.destination}}</span> - {{value.payload}}
+        <div v-else class="card-text" style="font-size: 12px;" v-for="(value, key) of messages">
+          <code class="text-dark">{{value.date}}</code> - <code class="text-success">{{value.destination}}</code> - <code>{{value.payload}}</code>
         </div>
 
         </div>
          
         </div>
-        <div class="card-footer text-muted">
+        <div class="card-footer text-muted bg-light">
         <div class="row">
-          <button class="ml-auto bottom btn btn-primary" v-on:click="disconnect">Disconnetti</button>
+          <button class="ml-auto bottom btn btn-dark" v-on:click="disconnect">Disconnect</button>
         </div>
         </div>
       </div>

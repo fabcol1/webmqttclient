@@ -4,14 +4,82 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>Web MQTT Client</title>
+    <link rel="icon" href="./favicon.ico" />
+
     <link rel="stylesheet" href="./css/scss/bootstrap.css" />
+    <link rel="stylesheet" href="./css/navbar-fixed-left.css" />
+    <link rel="stylesheet" href="./css/main.css" />
+    <title>Web MQTT Client</title>
   </head>
-  <body class=" bg-light">
+
+  <body class="bg-white">
     <div id="app">
-      <div class="container mt-3">
-        <section class="">
-          <div class="row align-items-end">
+      <nav class="navbar navbar-dark bg-light fixed-left text-center">
+        <a class="navbar-brand p-0 m-0 pt-1" href="./#" aria-label="Homepage">
+          <svg
+            width="9.984mm"
+            height="9.9295mm"
+            version="1.1"
+            viewBox="0 0 9.984 9.9295"
+            xmlns="http://www.w3.org/2000/svg"
+            xmlns:cc="http://creativecommons.org/ns#"
+            xmlns:dc="http://purl.org/dc/elements/1.1/"
+            xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+          >
+            <g transform="translate(286.03 -36.034)">
+              <g transform="matrix(.45627 0 0 .45378 -153.49 20.938)">
+                <g>
+                  <rect
+                    x="-290.24"
+                    y="33.517"
+                    width="21.382"
+                    height="21.382"
+                    fill="#fff"
+                    stroke="#000"
+                    stroke-width=".5"
+                  />
+                  <text
+                    x="-288.1535"
+                    y="47.240459"
+                    fill="#000000"
+                    font-family="sans-serif"
+                    font-size="8.4853px"
+                    letter-spacing="0px"
+                    stroke-width=".21213"
+                    word-spacing="0px"
+                    style="line-height:1.25"
+                    xml:space="preserve"
+                  >
+                    <tspan x="-288.1535" y="47.240459" stroke-width=".21213">
+                      Lew
+                    </tspan>
+                  </text>
+                </g>
+              </g>
+              <text
+                x="-278.76212"
+                y="44.831203"
+                fill="#000000"
+                font-family="sans-serif"
+                font-size="10.583px"
+                letter-spacing="0px"
+                stroke-width=".26458"
+                word-spacing="0px"
+                style="line-height:1.25"
+                xml:space="preserve"
+              >
+                <tspan x="-278.76212" y="54.194973" stroke-width=".26458" />
+              </text>
+            </g>
+          </svg>
+        </a>
+      </nav>
+      <div class="container-fluid px-0">
+        <section>
+          <div
+            class="row align-items-end"
+            style="max-width: 100%; margin: 0 auto;"
+          >
             <div class="form-group col-sm-12 col-md-4 ">
               <input
                 class="form-control "
@@ -37,29 +105,30 @@
               />
             </div>
             <button
-              class="form-group btn btn-primary col-sm-12 col-md-2"
+              class="form-group btn btn-dark col-sm-12 col-md-2"
               id="thisbutton"
               v-on:click="startConnection"
             >
-              Connetti
+              Connect
             </button>
           </div>
+          <div
+            ref="container"
+            class="mt-3 "
+            style="height: 90vh; width: 100%; position: relative; margin: 0 auto;"
+          >
+            <card-mqtt
+              v-for="(value, key) of activeClients"
+              v-bind:callback="disconnect"
+              v-bind:zindexcallback="zindexcallback"
+              v-bind:k="value.index"
+              :key="value.index"
+              :ip="value.ip"
+              :port="value.port"
+              :topic="value.topic"
+            ></card-mqtt>
+          </div>
         </section>
-      </div>
-      <div
-        ref="container"
-        class="mt-3 border"
-        style="height: 87vh; width: 95%; position: relative; margin: 0 auto;"
-      >
-        <card-mqtt
-          v-for="(value, key) of activeClients"
-          v-bind:callback="disconnect"
-          v-bind:k="value.index"
-          :key="value.index"
-          :ip="value.ip"
-          :port="value.port"
-          :topic="value.topic"
-        ></card-mqtt>
       </div>
     </div>
 
@@ -72,8 +141,6 @@
     <script type="module" src="./js/card-mqtt.js"></script>
 
     <script>
-      // let c = new MqttEasyClient("178.62.98.108", '8081', '#', true, function(message) {});
-      // setInterval( function() { c.disconnect(); },5000 );
       Vue.component('vue-draggable-resizable', VueDraggableResizable);
 
       var app = new Vue({
@@ -88,20 +155,7 @@
                 .toString(16)
                 .substring(1);
             }
-            return (
-              s4() +
-              s4() +
-              '-' +
-              s4() +
-              '-' +
-              s4() +
-              '-' +
-              s4() +
-              '-' +
-              s4() +
-              s4() +
-              s4()
-            );
+            return `${s4()}${s4()}-${s4()}-${s4()}-${s4()}-${s4()}${s4()}${s4()}`;
           },
           startConnection: function(e) {
             const ip = document.getElementById('ip').value;
@@ -111,25 +165,19 @@
             const obj = { ip, port, topic, index };
 
             if (ip && port && topic) {
-              // let c = new MqttEasyClient(ip, port, topic, true, function(message) {});
-              document.getElementById('ip').style.borderColor = '#ced4da';
-              document.getElementById('port').style.borderColor = '#ced4da';
-              document.getElementById('topic').style.borderColor = '#ced4da';
               this.activeClients.push(obj);
-            } else {
-              document.getElementById('ip').style.borderColor = !ip
-                ? '#dc3545'
-                : '#ced4da';
-              document.getElementById('port').style.borderColor = !port
-                ? '#dc3545'
-                : '#ced4da';
-              document.getElementById('topic').style.borderColor = !topic
-                ? '#dc3545'
-                : '#ced4da';
             }
           },
-          disconnect: function(e, component) {
-            console.log('Ho disconnesso ', component.key);
+          zindexcallback: function(e, component) {
+            component.zindex = 1000;
+            this.$children.forEach(c => {
+              if (component.key !== c.key) {
+                c.zindex = 100;
+              }
+            });
+          },
+          disconnect: function(e, component, event) {
+            console.log('disconnected ', component.key);
             this.activeClients = this.activeClients.filter(
               v => v.index !== component.key
             );
@@ -137,21 +185,13 @@
         },
         mounted() {
           setTimeout(() => {
-            this.activeClients.push(
-              {
-                ip: 'iot.eclipse.org',
-                port: '443',
-                topic: '#',
-                index: this.guid()
-              },
-              {
-                ip: 'iot.eclipse.org',
-                port: '443',
-                topic: '#',
-                index: this.guid()
-              }
-            );
-          }, 2000);
+            this.activeClients.push({
+              ip: 'iot.eclipse.org',
+              port: '443',
+              topic: '#',
+              index: this.guid()
+            });
+          }, 1000);
         }
       });
     </script>
