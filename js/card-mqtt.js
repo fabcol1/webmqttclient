@@ -1,7 +1,6 @@
 Vue.component('card-mqtt', {
   props: {
-    disconnectCallback: Function,
-    zIndexCallback: Function,
+    callback: Function,
     k: String,
     ip: String,
     port: String,
@@ -15,7 +14,8 @@ Vue.component('card-mqtt', {
       messages: [],
       client: undefined,
       error: false,
-      zindex: 1000
+      zindex: 1000,
+      dragLocked: false
     };
   },
 
@@ -24,7 +24,7 @@ Vue.component('card-mqtt', {
       try {
         this.client.disconnect();
       } catch (e) {}
-      this.disconnectCallback(e, this);
+      this.callback(e, this, 'disconnect');
     },
     onMessage: function(destination, payload) {
       setTimeout(() => {
@@ -36,13 +36,11 @@ Vue.component('card-mqtt', {
       }, 7);
     },
     onDragStartCallback: function(e) {
-      this.zIndexCallback(e, this);
-
-      // if (e.target.id !== 'header') {
-      //   if (e.stopPropagation) e.stopPropagation();
-      //   if (e.cancelBubble != null) e.cancelBubble = true;
-      //   throw 'Stop propagation';
-      // }
+      this.callback(e, this, 'zindex');
+      if (this.dragLocked) throw 'Stop propagation';
+    },
+    toggleDragLocked: function(e) {
+      this.dragLocked = !this.dragLocked;
     }
   },
 
@@ -67,12 +65,15 @@ Vue.component('card-mqtt', {
     <vue-draggable-resizable class="bg-light" :w="500" :h="250" :min-height="300" :min-width="300" :parent="true" :on-drag-start="onDragStartCallback" :z="zindex" :handles="['br', 'bl']">
       <div class="card text-center" style="position:relative; width:100%; height: 100% ">
         <div class="card-header text-left bg-light" id="header">
-          <code class="text-dark"> {{ip}}</code>:<code class="text-success">{{port}}</code> <code class="text-dark">{{topic}}</code>
+          <div class="row">
+            <div><code class="text-dark"> {{ip}}</code>:<code class="text-success">{{port}}</code> <code class="text-dark">{{topic}}</code></div>
+            <button v-on:click="toggleDragLocked" class="btn ml-auto py-0 my-0"><i v-bind:class="[dragLocked ? 'fas fa-lock' : 'fas fa-lock-open']"></i></button>
+          </div>
         </div>
         <div class="card-body" style="position:relative;">
           <div class= "scroll" style="width:100%; height: 100%; top: 0; position: absolute; left: 0; overflow-y: scroll; text-align: left; padding-left: 7px;">
             <div v-if="error" class="text-danger" >Damn! Connection Error!</div>
-            <div v-else class="card-text" style="font-size: 12px;" v-for="(value, key) of messages">
+            <div v-else class="card-text" style="font-size: 12px; white-space:nowrap;" v-for="(value, key) of messages">
               <code class="text-dark">{{value.date}}</code> - <code class="text-success">{{value.destination}}</code> - <code class="text-dark">{{value.payload}}</code>
             </div>
           </div>

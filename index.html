@@ -8,6 +8,10 @@
 
     <link rel="stylesheet" href="./css/scss/bootstrap.css" />
     <link rel="stylesheet" href="./css/navbar-fixed-left.css" />
+    <link
+      rel="stylesheet"
+      href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
+    />
     <link rel="stylesheet" href="./css/main.css" />
     <title>Web MQTT Client</title>
   </head>
@@ -25,8 +29,7 @@
           >
             <card-mqtt
               v-for="(value, key) of activeClients"
-              v-bind:disconnect-callback="disconnectCallback"
-              v-bind:z-index-callback="zIndexCallback"
+              v-bind:callback="cardMqttMultiplexer"
               v-bind:k="value.index"
               :key="value.index"
               :ip="value.ip"
@@ -74,6 +77,10 @@
               this.activeClients.push(obj);
             }
           },
+          cardMqttMultiplexer: function(e, component, event) {
+            if (event === 'disconnect') this.disconnectCallback(e, component);
+            if (event === 'zindex') this.zIndexCallback(e, component);
+          },
           zIndexCallback: function(e, component) {
             component.zindex = 1000;
             this.$children.forEach(c => {
@@ -82,7 +89,7 @@
               }
             });
           },
-          disconnectCallback: function(e, component, event) {
+          disconnectCallback: function(e, component) {
             console.log('disconnected ', component.key);
             this.activeClients = this.activeClients.filter(
               v => v.index !== component.key
