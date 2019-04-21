@@ -1,0 +1,20 @@
+.container-fluid {
+  max-width: 95%;
+  margin: 0 auto;
+}
+@media (min-width: 768px) {
+  .container-fluid {
+    margin-left: 70px;
+    max-width: calc(100% - 100px);
+    margin-top: 12px;
+  }
+}
+@import url('https://fonts.googleapis.com/css?family=Space+Mono');
+body,
+html {
+  font-family: 'Space Mono', monospace;
+}
+
+.form-group {
+  margin-bottom: 0.4rem !important;
+}

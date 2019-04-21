@@ -4,76 +4,56 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <title>Web Mqtt Client</title>
-    <link rel="stylesheet" href="./css/scss/bootstrap.css" />
+    <link rel="icon" href="./favicon.ico" />
+
+    <link rel="stylesheet" href="./css/bootstrap.css" />
+    <link rel="stylesheet" href="./css/navbar-fixed-left.css" />
+    <link
+      rel="stylesheet"
+      href="https://use.fontawesome.com/releases/v5.8.1/css/all.css"
+    />
+    <link rel="stylesheet" href="./css/main.css" />
+    <title>Web MQTT Client</title>
   </head>
-  <body class=" bg-light">
+
+  <body class="bg-white">
     <div id="app">
-      <div class="container mt-3">
-        <section class="">
-          <div class="row align-items-end">
-            <div class="form-group col-sm-12 col-md-4 ">
-              <input
-                class="form-control "
-                type="text"
-                id="ip"
-                placeholder="IP"
-              />
-            </div>
-            <div class="form-group col-sm-12 col-md-2 ">
-              <input
-                class="form-control "
-                type="text"
-                id="port"
-                placeholder="Port"
-              />
-            </div>
-            <div class="form-group col-sm-12 col-md-4 ">
-              <input
-                class="form-control "
-                type="text"
-                id="topic"
-                placeholder="Topic"
-              />
-            </div>
-            <button
-              class="form-group btn btn-primary col-sm-12 col-md-2"
-              id="thisbutton"
-              v-on:click="startConnection"
-            >
-              Connetti
-            </button>
+      <leftside-navbar></leftside-navbar>
+      <div class="container-fluid px-0">
+        <section>
+          <main-form v-bind:callback="startConnection"></main-form>
+
+          <div
+            class="mt-3"
+            style="height: 90vh; width: 100%; position: relative; margin: 0 auto;"
+          >
+            <card-mqtt
+              v-for="(value, key) of activeClients"
+              v-bind:callback="cardMqttMultiplexer"
+              v-bind:k="value.index"
+              :key="value.index"
+              :ip="value.ip"
+              :port="value.port"
+              :topic="value.topic"
+              :username="value.username"
+              :password="value.password"
+            ></card-mqtt>
           </div>
         </section>
-      </div>
-      <div
-        ref="container"
-        class="mt-3 border"
-        style="height: 87vh; width: 95%; position: relative; margin: 0 auto;"
-      >
-        <card-mqtt
-          v-for="(value, key) of activeClients"
-          v-bind:callback="disconnect"
-          v-bind:k="value.index"
-          :key="value.index"
-          :ip="value.ip"
-          :port="value.port"
-          :topic="value.topic"
-        ></card-mqtt>
       </div>
     </div>
 
     <script src="./js/mqttws31.min.js"></script>
     <script src="./js/MqttEasyClient.js"></script>
     <script src="./js/vue.min.js"></script>
-
     <script src="./js/VueDraggableResizable.umd.min.js"></script>
     <link rel="stylesheet" href="./css/VueDraggableResizable.css" />
-    <script type="module" src="./js/card-mqtt.js"></script>
+
+    <script src="./js/leftside-navbar.js"></script>
+    <script src="./js/main-form.js"></script>
+    <script src="./js/card-mqtt.js"></script>
 
     <script>
-      // let c = new MqttEasyClient("178.62.98.108", '8081', '#', true, function(message) {});
-      // setInterval( function() { c.disconnect(); },5000 );
       Vue.component('vue-draggable-resizable', VueDraggableResizable);
 
       var app = new Vue({
@@ -88,48 +68,29 @@
                 .toString(16)
                 .substring(1);
             }
-            return (
-              s4() +
-              s4() +
-              '-' +
-              s4() +
-              '-' +
-              s4() +
-              '-' +
-              s4() +
-              '-' +
-              s4() +
-              s4() +
-              s4()
-            );
+            return `${s4()}${s4()}-${s4()}-${s4()}-${s4()}-${s4()}${s4()}${s4()}`;
           },
-          startConnection: function(e) {
-            const ip = document.getElementById('ip').value;
-            const port = document.getElementById('port').value;
-            const topic = document.getElementById('topic').value;
-            const index = this.guid();
-            const obj = { ip, port, topic, index };
-
+          startConnection: function(e, component) {
+            const { ip, port, topic, username, password } = component;
+            const obj = { ip, port, topic, username, password };
             if (ip && port && topic) {
-              // let c = new MqttEasyClient(ip, port, topic, true, function(message) {});
-              document.getElementById('ip').style.borderColor = '#ced4da';
-              document.getElementById('port').style.borderColor = '#ced4da';
-              document.getElementById('topic').style.borderColor = '#ced4da';
               this.activeClients.push(obj);
-            } else {
-              document.getElementById('ip').style.borderColor = !ip
-                ? '#dc3545'
-                : '#ced4da';
-              document.getElementById('port').style.borderColor = !port
-                ? '#dc3545'
-                : '#ced4da';
-              document.getElementById('topic').style.borderColor = !topic
-                ? '#dc3545'
-                : '#ced4da';
             }
           },
-          disconnect: function(e, component) {
-            console.log('Ho disconnesso ', component.key);
+          cardMqttMultiplexer: function(e, component, event) {
+            if (event === 'disconnect') this.disconnectCallback(e, component);
+            if (event === 'zindex') this.zIndexCallback(e, component);
+          },
+          zIndexCallback: function(e, component) {
+            component.zindex = 1000;
+            this.$children.forEach(c => {
+              if (component.key !== c.key) {
+                c.zindex = 100;
+              }
+            });
+          },
+          disconnectCallback: function(e, component) {
+            console.log('disconnected ', component.key);
             this.activeClients = this.activeClients.filter(
               v => v.index !== component.key
             );
@@ -140,12 +101,15 @@
             this.activeClients.push({
               ip: 'iot.eclipse.org',
               port: '443',
-              topic: '#',
+              topic: '$SYS/broker/connection/#',
               index: this.guid()
             });
-          }, 2000);
+          }, 1000);
         }
       });
     </script>
+
+    <script src="./js/jquery-3.3.1.min.js"></script>
+    <!-- <script src="./js/telegram-msg.js"></script> -->
   </body>
 </html>
